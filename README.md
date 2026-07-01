@@ -2,8 +2,6 @@
 
 A complete, self-built study system for the **(ISC)² CISSP** exam — eight-domain notes with inline Mermaid diagrams, spaced-repetition flashcards, and interactive drag-and-drop drills. Written while preparing for (and passing) the exam, and kept as open educational material.
 
-> **Scope:** original study material only. No copyrighted question banks or third-party study-guide text (Sybex, Wiley, Boson/Thor, TotalTester, etc.) is reproduced here.
-
 ---
 
 ## The 8 domains
@@ -60,7 +58,7 @@ Self-contained HTML apps — open in any browser, no server or build needed:
 - **[Order & Match drills](practice/drills/order-match-drills.html)** — drag-and-drop sequencing and matching (the CAT-style item types). Mastering the order is what powers FIRST / NEXT / LAST questions.
 - **[Categorize drills](practice/drills/categorize-drills.html)** — sort items into the correct buckets.
 
-> Live version: if this repo is published with **GitHub Pages**, the same apps run at `…github.io/<repo>/` (see `index.html`).
+> **▶ Live site:** [**mchlstr.github.io/CISSP-Study-notes**](https://mchlstr.github.io/CISSP-Study-notes/) — the flashcards and drills run right in your browser.
 
 ## Repository structure
 
@@ -79,13 +77,3 @@ Self-contained HTML apps — open in any browser, no server or build needed:
 - Consider the **business impact** first.
 - When in doubt, choose the answer that **reduces risk** or **protects human life**.
 - Domains 1 and 7 carry the most weight combined — prioritize them.
-
----
-
-## Acknowledgements
-
-Built on the publicly defined **(ISC)² CISSP Common Body of Knowledge** and widely published standards and frameworks (NIST, ISO, OWASP, and others). All notes, definitions, flashcards, and diagrams are written in original wording; authoritative sources were consulted only to verify facts, not reproduced.
-
-## License & disclaimer
-
-Personal study notes shared for educational use. CISSP and (ISC)² are trademarks of (ISC)². This material is independent and not endorsed by or affiliated with (ISC)². No exam content or proprietary question banks are reproduced here.
