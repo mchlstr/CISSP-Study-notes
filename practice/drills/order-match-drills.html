@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CISSP — Order & Match Drills</title>
+<style>
+  :root{
+    --bg:#0f1620; --card:#16202c; --ink:#e7eef5; --muted:#9fb0c0;
+    --line:#27384a; --accent:#4ea1ff; --ok:#27c093; --bad:#ff6b6b; --warn:#ffcf5c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+  header{position:sticky;top:0;background:#0c121b;border-bottom:1px solid var(--line);
+    padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;z-index:5}
+  header h1{font-size:18px;margin:0;flex:1 1 auto}
+  .score{font-size:14px;color:var(--muted)}
+  .score b{color:var(--ink)}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#1d2a38;
+    color:var(--ink);padding:7px 13px;border-radius:8px}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#06223f;font-weight:600}
+  button.ghost{background:transparent}
+  main{max-width:760px;margin:0 auto;padding:24px 18px 80px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--line);border-radius:20px;padding:2px 10px;margin-bottom:10px}
+  .tag.match{color:var(--warn)}
+  .tag.scen{color:#a78bfa}
+  .scenario{background:#1b2733;border-left:3px solid #a78bfa;border-radius:8px;
+    padding:11px 14px;margin:10px 0 14px;color:#cdd9e5;font-size:15px}
+  h2.title{font-size:20px;margin:.2em 0 .1em}
+  .prompt{color:var(--muted);margin-bottom:16px}
+  ul.order{list-style:none;margin:0;padding:0}
+  ul.order li{display:flex;align-items:center;gap:10px;background:#1b2733;border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;margin:8px 0;cursor:grab}
+  ul.order li.dragging{opacity:.4}
+  ul.order li .num{width:24px;height:24px;flex:0 0 auto;border-radius:50%;background:#24384c;
+    display:grid;place-items:center;font-size:13px;color:var(--muted)}
+  ul.order li .txt{flex:1 1 auto}
+  ul.order li .arrows{display:flex;flex-direction:column;gap:2px}
+  ul.order li .arrows button{padding:0 7px;line-height:1.3;font-size:12px}
+  li.correct{border-color:var(--ok);background:#142b26}
+  li.wrong{border-color:var(--bad);background:#2c1820}
+  .matchrow{display:flex;gap:12px;align-items:center;margin:9px 0}
+  .matchrow .left{flex:1 1 46%;background:#1b2733;border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px}
+  .matchrow select{flex:1 1 54%;padding:10px;border-radius:10px;background:#1b2733;
+    color:var(--ink);border:1px solid var(--line)}
+  .matchrow select.correct{border-color:var(--ok)}
+  .matchrow select.wrong{border-color:var(--bad)}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .feedback{margin-top:16px;padding:12px 14px;border-radius:10px;display:none}
+  .feedback.show{display:block}
+  .feedback.good{background:#13302a;border:1px solid var(--ok)}
+  .feedback.poor{background:#2c1820;border:1px solid var(--bad)}
+  .answerkey{margin-top:12px;font-size:14px;color:var(--muted)}
+  .answerkey ol{margin:6px 0 0;padding-left:22px}
+  .hint{color:var(--muted);font-size:13px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CISSP — Order &amp; Match Drills</h1>
+  <div class="score">Exercise <b id="sPos">1</b> / <b id="sTotal">0</b> &nbsp;·&nbsp; Correct: <b id="sCorrect">0</b> / <b id="sDone">0</b></div>
+  <button class="ghost" id="shuffleBtn">↻ Reshuffle deck</button>
+</header>
+<main>
+  <div class="card" id="card"></div>
+</main>
+
+<script>
+/* ---------- DATA ----------
+   ordering: items listed in the CORRECT order (first -> last)
+   matching: pairs [left, correctRight] */
+const ORDERING = [
+  {t:"OAuth 2.0 authorization code flow", items:["Client redirects user to the Authorization Server","User authenticates and consents","Authorization Server returns an authorization code","Client exchanges the code for an access token","Client presents the access token to the Resource Server","Resource Server returns the protected resource"]},
+  {t:"SAML web SSO (SP-initiated)", items:["User requests a resource at the Service Provider","SP redirects the user to the Identity Provider","User authenticates to the IdP","IdP returns a signed SAML assertion","Browser posts the assertion back to the SP","SP validates it and grants access"]},
+  {t:"802.1X / EAP network access", items:["Supplicant connects to the port","Authenticator requests identity (EAPOL)","Supplicant sends its identity","Authenticator relays it to the RADIUS server","EAP authentication exchange","RADIUS Accept or Reject — the port opens or stays blocked"]},
+  {t:"TLS handshake", items:["ClientHello","ServerHello","Server sends certificate and key-exchange data","Client verifies the certificate and sends key material","Both derive session keys (Change Cipher Spec)","Encrypted session begins (Finished)"]},
+  {t:"TCP three-way handshake", items:["SYN","SYN-ACK","ACK"]},
+  {t:"Disaster recovery plan (DRP) execution", items:["Declare the disaster","Notify and activate the teams","Assess the damage","Recover critical systems at the alternate site","Restore operations","Fail back to the primary site","Review and capture lessons learned"]},
+  {t:"Security audit process", items:["Define scope and objectives","Plan the audit","Gather evidence","Evaluate against the criteria","Report the findings","Follow up on remediation"]},
+  {t:"NIST incident response (SP 800-61) phases", items:["Preparation","Detection and Analysis","Containment, Eradication and Recovery","Post-Incident Activity"]},
+  {t:"Access control — IAAA", items:["Identification","Authentication","Authorization","Accountability"]},
+  {t:"OSI model (Layer 1 → Layer 7)", items:["Physical","Data Link","Network","Transport","Session","Presentation","Application"]},
+  {t:"Incident Response (ISC2 steps)", items:["Detection","Response","Mitigation","Reporting","Recovery","Remediation","Lessons Learned"]},
+  {t:"Business Continuity Planning (BCP)", items:["Project Scope and Planning","Business Impact Analysis","Continuity Planning","Approval and Implementation"]},
+  {t:"Business Impact Analysis (BIA) steps", items:["Identify Priorities","Risk Identification","Likelihood Assessment","Impact Analysis","Resource Prioritization"]},
+  {t:"NIST Risk Management Framework (RMF, 800-37)", items:["Prepare","Categorize","Select","Implement","Assess","Authorize","Monitor"]},
+  {t:"Software testing levels (scope)", items:["Unit","Integration","System","Acceptance"]},
+  {t:"System lifecycle (NIST SDLC)", items:["Initiation","Development / Acquisition","Implementation","Operation / Maintenance","Disposal"]},
+  {t:"Waterfall SDLC phases", items:["Requirements","Design","Development","Testing","Deployment","Maintenance"]},
+  {t:"Cyber Kill Chain (Lockheed Martin)", items:["Reconnaissance","Weaponization","Delivery","Exploitation","Installation","Command and Control","Actions on Objectives"]},
+  {t:"Change Management process", items:["Request","Evaluate / Impact Analysis","Approve","Test","Implement","Document"]},
+  {t:"Digital Forensics process (NIST 800-86)", items:["Collection","Examination","Analysis","Reporting"]},
+  {t:"Data lifecycle", items:["Create","Store","Use","Share","Archive","Destroy"]},
+  {t:"Threat modeling process", items:["Identify Assets","Decompose System (DFD)","Identify Threats (STRIDE)","Rank Threats (DREAD)","Respond","Validate"]},
+  {t:"Penetration testing phases", items:["Planning","Information Gathering","Scanning / Enumeration","Vulnerability Analysis","Exploitation","Reporting"]},
+  {t:"Patch management", items:["Assess","Test","Approve","Deploy","Verify"]},
+  {t:"Recovery sites — slowest → fastest recovery", items:["Cold site","Warm site","Hot site"]},
+  {t:"Government data classification (lowest → highest)", items:["Unclassified","Confidential","Secret","Top Secret"]},
+  {t:"Wireless security (oldest/weakest → newest/strongest)", items:["WEP","WPA","WPA2","WPA3"]},
+  {t:"Auth protocol strength (weak → strong)", items:["PAP","CHAP","EAP"]},
+  {t:"Fire development stages", items:["Incipient","Smoke","Flame","Heat"]},
+  {t:"General risk assessment flow", items:["Asset Identification","Threat Identification","Vulnerability Identification","Risk Determination","Control / Response Selection"]},
+  {t:"Cryptographic key lifecycle", items:["Generation","Distribution","Use","Revocation","Destruction"]},
+  {t:"Account / identity lifecycle", items:["Provisioning","Authorization","Review / Recertification","Deprovisioning"]},
+  {t:"Media sanitization — weakest → strongest assurance", items:["Erase / Delete","Clear","Purge","Destroy"]},
+  {t:"Digital certificate lifecycle", items:["Enrollment / Request","Issuance","Distribution","Use / Validation","Revocation or Expiration"]},
+  {t:"DR/BCP test types — least → most disruptive", items:["Read-through / Checklist","Structured walk-through (tabletop)","Simulation","Parallel test","Full-interruption test"]},
+  {t:"CMM / CMMI maturity levels", items:["Initial","Repeatable","Defined","Managed","Optimizing"]},
+  {t:"IDEAL model (process improvement)", items:["Initiating","Diagnosing","Establishing","Acting","Learning"]},
+  {t:"Kerberos authentication flow", items:["Client authenticates to the AS","AS issues a TGT","Client presents the TGT to the TGS","TGS issues a service ticket","Client presents the service ticket to the resource","Resource grants access"]},
+  {t:"Data classification process", items:["Identify / inventory the data","Classify (assign sensitivity level)","Label / mark","Handle per classification","Declassify or Destroy"]},
+];
+
+const MATCHING = [
+  {t:"Identity assurance level → meaning", pairs:[["IAL","How strongly your real-world identity was proofed"],["AAL","How strongly you authenticate at each login"],["FAL","How strongly a federation assertion is protected"]]},
+  {t:"App security testing → trait", pairs:[["SAST","White-box; reads source code; no execution"],["DAST","Black-box; tests the running app; no source"],["IAST","Instrumented agent inside the running app"],["SCA","Scans third-party / open-source components"]]},
+  {t:"Software maturity model → descriptor", pairs:[["SW-CMM","Five software-process maturity levels"],["CMMI","Successor; capability + maturity model"],["SAMM","OWASP; prescriptive software-assurance model"],["BSIMM","Descriptive; observed real-world practices"]]},
+  {t:"AAA protocol → trait", pairs:[["RADIUS","UDP; encrypts only the password; combines authN/authZ"],["TACACS+","TCP 49; encrypts the full payload; separates AAA"],["Diameter","RADIUS successor; reliable transport"]]},
+  {t:"OAuth 2.0 role → function", pairs:[["Resource Owner","The user who owns the data"],["Client","The app requesting access on the user's behalf"],["Authorization Server","Issues access tokens"],["Resource Server","Holds the data; accepts tokens"]]},
+  {t:"STRIDE → security property violated", pairs:[
+    ["Spoofing","Authentication"],["Tampering","Integrity"],["Repudiation","Non-repudiation"],
+    ["Information Disclosure","Confidentiality"],["Denial of Service","Availability"],["Elevation of Privilege","Authorization"]]},
+  {t:"RAID level → what it does", pairs:[
+    ["RAID 0","Striping — speed, NO redundancy"],["RAID 1","Mirroring — full duplicate"],
+    ["RAID 5","Striping + distributed parity (1 disk fault)"],["RAID 6","Double parity (2 disk faults)"],
+    ["RAID 10","Mirror + stripe (1+0)"]]},
+  {t:"Cloud service model → what YOU manage", pairs:[
+    ["IaaS","You manage OS, runtime, apps, data"],["PaaS","You manage apps and data only"],
+    ["SaaS","You manage data / config only"]]},
+  {t:"SOC report → purpose", pairs:[
+    ["SOC 1","Financial-reporting controls"],["SOC 2","Security/availability — restricted audience"],
+    ["SOC 3","Public general-use seal of SOC 2"]]},
+  {t:"Biometric error → meaning", pairs:[
+    ["FAR (Type II)","Wrongly ACCEPTS an impostor"],["FRR (Type I)","Wrongly REJECTS a legit user"],
+    ["CER","Crossover where FAR = FRR (lower = better)"]]},
+  {t:"Backup type → description", pairs:[
+    ["Full","Everything; clears archive bit"],["Incremental","Changes since last backup; clears archive bit"],
+    ["Differential","Changes since last FULL; does NOT clear archive bit"]]},
+  {t:"Recovery site → readiness", pairs:[
+    ["Hot site","Fully ready, near-instant (minutes)"],["Warm site","Hardware ready, no live data (hours–days)"],
+    ["Cold site","Empty space/power only (weeks)"]]},
+  {t:"Risk response → action", pairs:[
+    ["Avoid","Stop the risky activity entirely"],["Transfer","Insurance / shift to a third party"],
+    ["Mitigate","Reduce the risk with controls"],["Accept","Acknowledge and do nothing"]]},
+  {t:"Cloud deployment model → who shares it", pairs:[
+    ["Private","Single organization (single-tenant)"],["Public","Shared by anyone (multi-tenant)"],
+    ["Community","Gated group with a shared concern"],["Hybrid","Mix of private + public"]]},
+  {t:"Crypto algorithm → classification", pairs:[
+    ["AES","Symmetric"],["RSA","Asymmetric"],["SHA-256","Hashing"],
+    ["DES / 3DES","Symmetric"],["ECC","Asymmetric"],["Diffie-Hellman","Asymmetric (key exchange)"]]},
+  {t:"Access control model → how access is decided", pairs:[
+    ["DAC","Owner decides access"],["MAC","Labels + clearance, system-enforced"],
+    ["RBAC","Access by job role"],["ABAC","Access by attributes + context"],
+    ["Rule-based","Uniform if-then conditions (firewall)"]]},
+  {t:"Security model → what it protects", pairs:[
+    ["Bell-LaPadula","Confidentiality: no read up, no write down"],["Biba","Integrity: no write up, no read down"],
+    ["Clark-Wilson","Integrity via well-formed transactions"],["Brewer-Nash","Conflict of interest (Chinese Wall)"]]},
+  {t:"Fire extinguisher class → fire type", pairs:[
+    ["Class A","Ordinary combustibles (wood, paper)"],["Class B","Flammable liquids / gases"],
+    ["Class C","Electrical fires"],["Class D","Combustible metals"],["Class K","Kitchen / cooking oils"]]},
+  {t:"OSI layer → device / protocol", pairs:[
+    ["Physical (L1)","Cable, hub, repeater"],["Data Link (L2)","Switch, MAC, ARP"],
+    ["Network (L3)","Router, IP"],["Transport (L4)","TCP, UDP"],["Application (L7)","HTTP, DNS, SMTP"]]},
+  {t:"NIST Special Publication → purpose", pairs:[
+    ["SP 800-37","Risk Management Framework (RMF)"],["SP 800-53","Catalog of security & privacy controls"],
+    ["SP 800-53A","Assessing security controls"],["SP 800-30","Conducting risk assessments"],
+    ["SP 800-61","Incident handling"],["SP 800-86","Forensics in incident response"],
+    ["SP 800-88","Media sanitization"],["CSF","Cybersecurity Framework (ID/PR/DE/RS/RC)"]]},
+  {t:"Plan → time horizon", pairs:[
+    ["Strategic plan","Long-term, ~5 years, org-wide goals"],["Tactical plan","Mid-term, ~1 year, project milestones"],
+    ["Operational plan","Short-term, detailed, updated frequently"]]},
+  {t:"Common port → service", pairs:[
+    ["21","FTP"],["22","SSH"],["23","Telnet"],["25","SMTP"],["53","DNS"],
+    ["80","HTTP"],["443","HTTPS"],["389","LDAP"],["3389","RDP"]]},
+  {t:"Wireless security → encryption", pairs:[
+    ["WEP","RC4 + weak 24-bit IV"],["WPA","TKIP"],["WPA2","AES-CCMP (802.11i)"],["WPA3","SAE / Dragonfly"]]},
+  {t:"Hash algorithm → output size", pairs:[
+    ["MD5","128-bit"],["SHA-1","160-bit"],["SHA-256","256-bit"],["SHA-512","512-bit"]]},
+  {t:"Kerberos component → role", pairs:[
+    ["KDC","Trusted third party hosting AS + TGS"],["AS","Verifies identity, issues the TGT"],
+    ["TGS","Issues service tickets"],["TGT","Proves you authenticated; used to request service tickets"],
+    ["Service ticket","Grants access to one specific service"]]},
+  {t:"VPN / tunneling protocol → trait", pairs:[
+    ["PPTP","Old, weak, GRE-based"],["L2TP","No encryption alone — paired with IPsec"],
+    ["IPsec","Native encryption at the network layer"],["SSL/TLS VPN","Browser-based, transport/app layer"]]},
+  {t:"Symmetric algorithm → key length", pairs:[
+    ["DES","56-bit"],["Skipjack","80-bit"],["3DES","112 or 168-bit"],
+    ["IDEA","128-bit"],["AES","128 / 192 / 256-bit"],["Blowfish","32–448-bit (variable)"]]},
+  {t:"Asymmetric algorithm → key length", pairs:[
+    ["RSA","1024 / 2048 / 4096-bit"],["ECC","256-bit — small key, RSA-3072 strength"],
+    ["Diffie-Hellman","2048-bit+ for key exchange"],["DSA","1024 / 2048 / 3072-bit (signatures)"]]},
+];
+
+/* SCENARIO ordering: narrative prompt (s) + items in CORRECT order */
+const SCENARIOS = [
+  {t:"Authorizing a federal system (NIST RMF)",
+   s:"A U.S. federal agency is bringing a new case-management system online and must follow the NIST Risk Management Framework (800-37) to get an Authority to Operate. Order the steps the team performs.",
+   items:["Prepare","Categorize","Select","Implement","Assess","Authorize","Monitor"]},
+  {t:"Responding to a 2 a.m. intrusion (Incident Response)",
+   s:"A SOC analyst notices unusual outbound traffic from a finance server at 2 a.m. and confirms it's a live intrusion. Order the incident-management steps the team should follow.",
+   items:["Detection","Response","Mitigation","Reporting","Recovery","Remediation","Lessons Learned"]},
+  {t:"Standing up a continuity program (BCP)",
+   s:"Leadership has just chartered a new business continuity program after a near-miss outage. Order the high-level BCP phases the team works through.",
+   items:["Project Scope and Planning","Business Impact Analysis","Continuity Planning","Approval and Implementation"]},
+  {t:"Running the Business Impact Analysis (BIA)",
+   s:"The continuity team is now inside the BIA, deciding which functions matter and where to put recovery resources. Order the BIA steps.",
+   items:["Identify Priorities","Risk Identification","Likelihood Assessment","Impact Analysis","Resource Prioritization"]},
+  {t:"Pushing a config change to production (Change Management)",
+   s:"A developer wants to change a firewall rule on a production server. The org enforces formal change management. Order the steps before and after the change.",
+   items:["Request","Evaluate / Impact Analysis","Approve","Test","Implement","Document"]},
+  {t:"Preserving evidence on a breached server (Forensics)",
+   s:"An investigator arrives at a compromised server and must handle evidence so it holds up in court (NIST 800-86). Order the forensic process.",
+   items:["Collection","Examination","Analysis","Reporting"]},
+  {t:"An authorized penetration test",
+   s:"A pentester has signed the rules of engagement and begins an authorized external test against a client. Order the phases of the engagement.",
+   items:["Planning","Information Gathering","Scanning / Enumeration","Vulnerability Analysis","Exploitation","Reporting"]},
+  {t:"Threat-modeling a new web app at design time",
+   s:"A development team is threat-modeling a new customer portal during the design phase, before any code is written. Order the threat-modeling process.",
+   items:["Identify Assets","Decompose System (DFD)","Identify Threats (STRIDE)","Rank Threats (DREAD)","Respond","Validate"]},
+  {t:"Deploying an emergency patch",
+   s:"A critical vulnerability is announced and a patch is released for your fleet of servers. Order the patch-management steps before it reaches production.",
+   items:["Assess","Test","Approve","Deploy","Verify"]},
+  {t:"Anatomy of an APT attack (Cyber Kill Chain)",
+   s:"A threat-intel report reconstructs how an APT group breached a peer company. Order the stages of the attack using the Lockheed Martin Cyber Kill Chain.",
+   items:["Reconnaissance","Weaponization","Delivery","Exploitation","Installation","Command and Control","Actions on Objectives"]},
+  {t:"Building software the waterfall way (SDLC)",
+   s:"A team is delivering a fixed-scope application for a regulator using the classic waterfall SDLC. Order the development phases.",
+   items:["Requirements","Design","Development","Testing","Deployment","Maintenance"]},
+  {t:"A sensitive document's journey (Data Lifecycle)",
+   s:"Track a confidential contract from the moment it's authored to the moment it's destroyed. Order the data lifecycle stages.",
+   items:["Create","Store","Use","Share","Archive","Destroy"]},
+  {t:"Running the vulnerability-management cycle",
+   s:"Your security team runs a recurring vulnerability-management program against the estate. Order the cycle's steps.",
+   items:["Identify","Assess / Prioritize","Remediate","Verify","Report"]},
+  {t:"Testing software from unit to user (Test levels)",
+   s:"A team has finished coding and is moving the build through its testing levels, from a single function up to the customer's sign-off. Order the test levels.",
+   items:["Unit","Integration","System","Acceptance"]},
+];
+
+/* ---------- ENGINE ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let deck=[], pos=0, correct=0, done=0, answered=false;
+
+function buildDeck(){
+  deck = shuffle([
+    ...ORDERING.map(e=>({type:'order',data:e})),
+    ...SCENARIOS.map(e=>({type:'order',data:e})),
+    ...MATCHING.map(e=>({type:'match',data:e})),
+  ]);
+  pos=0; correct=0; done=0;
+  document.getElementById('sCorrect').textContent=0;
+  document.getElementById('sDone').textContent=0;
+  document.getElementById('sTotal').textContent=deck.length;
+}
+function updateProgress(){
+  document.getElementById('sPos').textContent=Math.min(pos+1,deck.length);
+  document.getElementById('sTotal').textContent=deck.length;
+}
+function render(){
+  answered=false;
+  if(pos>=deck.length){ renderDone(); return; }
+  updateProgress();
+  const item=deck[pos];
+  if(item.type==='order') renderOrder(item.data);
+  else renderMatch(item.data);
+}
+function renderDone(){
+  document.getElementById('sPos').textContent=deck.length;
+  const card=document.getElementById('card');
+  card.innerHTML=`<span class="tag">Done</span>
+    <h2 class="title">✓ All ${deck.length} exercises complete</h2>
+    <p class="prompt">You scored <b>${correct}</b> / ${deck.length} correct. Reshuffle for a fresh run in a new random order.</p>
+    <div class="controls"><button class="primary" id="restartBtn">↻ Restart (reshuffle)</button></div>`;
+  document.getElementById('restartBtn').onclick=()=>{buildDeck();render();};
+}
+
+/* ----- ORDERING ----- */
+function renderOrder(ex){
+  const start = shuffle(ex.items);
+  // avoid accidentally-correct shuffle for short lists
+  let guard=0;
+  let arr=start;
+  while(arr.join('|')===ex.items.join('|') && guard++<20) arr=shuffle(ex.items);
+  const card=document.getElementById('card');
+  const scen = ex.s ? `<span class="tag scen">Scenario — put in order</span>` : `<span class="tag">Put in order</span>`;
+  const narr = ex.s ? `<p class="scenario">${ex.s}</p>` : '';
+  card.innerHTML=`
+    ${scen}
+    <h2 class="title">${ex.t}</h2>
+    ${narr}
+    <p class="prompt">Drag (or use ▲▼) to arrange first → last, then Check.</p>
+    <ul class="order" id="ol"></ul>
+    <div class="controls">
+      <button class="primary" id="checkBtn">Check</button>
+      <button class="ghost" id="answerBtn">Show answer</button>
+      <button id="nextBtn">Next →</button>
+    </div>
+    <div class="feedback" id="fb"></div>`;
+  const ol=document.getElementById('ol');
+  arr.forEach(txt=>{
+    const li=document.createElement('li');
+    li.draggable=true;
+    li.innerHTML=`<span class="num"></span><span class="txt">${txt}</span>
+      <span class="arrows"><button data-d="up">▲</button><button data-d="down">▼</button></span>`;
+    ol.appendChild(li);
+  });
+  renumber();
+  // arrows
+  ol.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    const li=b.closest('li');
+    if(b.dataset.d==='up'&&li.previousElementSibling) ol.insertBefore(li,li.previousElementSibling);
+    if(b.dataset.d==='down'&&li.nextElementSibling) ol.insertBefore(li.nextElementSibling,li);
+    renumber();
+  });
+  // drag
+  let dragEl=null;
+  ol.addEventListener('dragstart',e=>{dragEl=e.target.closest('li');dragEl.classList.add('dragging');});
+  ol.addEventListener('dragend',()=>{if(dragEl){dragEl.classList.remove('dragging');dragEl=null;renumber();}});
+  ol.addEventListener('dragover',e=>{
+    e.preventDefault();
+    const after=[...ol.querySelectorAll('li:not(.dragging)')].reduce((closest,child)=>{
+      const box=child.getBoundingClientRect();const offset=e.clientY-box.top-box.height/2;
+      return offset<0&&offset>closest.offset?{offset,el:child}:closest;
+    },{offset:-Infinity}).el;
+    if(!dragEl)return;
+    if(after==null) ol.appendChild(dragEl); else ol.insertBefore(dragEl,after);
+  });
+  document.getElementById('checkBtn').onclick=()=>checkOrder(ex);
+  document.getElementById('answerBtn').onclick=()=>showOrderAnswer(ex);
+  document.getElementById('nextBtn').onclick=next;
+}
+function renumber(){[...document.querySelectorAll('#ol li')].forEach((li,i)=>li.querySelector('.num').textContent=i+1);}
+function checkOrder(ex){
+  if(answered) return;
+  const lis=[...document.querySelectorAll('#ol li')];
+  let ok=true;
+  lis.forEach((li,i)=>{
+    const right=li.querySelector('.txt').textContent===ex.items[i];
+    li.classList.add(right?'correct':'wrong'); if(!right) ok=false;
+  });
+  finishFeedback(ok, ok?'Correct order!':'Not quite — see the highlights and the answer key.');
+  if(!ok) showOrderAnswer(ex);
+}
+function showOrderAnswer(ex){
+  const fb=document.getElementById('fb');
+  fb.classList.add('show');
+  const exist=fb.querySelector('.answerkey'); if(exist) return;
+  const div=document.createElement('div');div.className='answerkey';
+  div.innerHTML='<b>Correct order:</b><ol>'+ex.items.map(i=>`<li>${i}</li>`).join('')+'</ol>';
+  fb.appendChild(div);
+  if(!fb.classList.contains('good')&&!fb.classList.contains('poor')){fb.classList.add('poor');}
+}
+
+/* ----- MATCHING ----- */
+function renderMatch(ex){
+  const options=shuffle(ex.pairs.map(p=>p[1]));
+  const card=document.getElementById('card');
+  card.innerHTML=`
+    <span class="tag match">Match</span>
+    <h2 class="title">${ex.t}</h2>
+    <p class="prompt">Pick the matching answer for each item, then Check.</p>
+    <div id="ml"></div>
+    <div class="controls">
+      <button class="primary" id="checkBtn">Check</button>
+      <button class="ghost" id="answerBtn">Show answer</button>
+      <button id="nextBtn">Next →</button>
+    </div>
+    <div class="feedback" id="fb"></div>`;
+  const ml=document.getElementById('ml');
+  ex.pairs.forEach((p,i)=>{
+    const row=document.createElement('div');row.className='matchrow';
+    row.innerHTML=`<div class="left">${p[0]}</div>
+      <select data-i="${i}"><option value="">— choose —</option>
+      ${options.map(o=>`<option value="${o.replace(/"/g,'&quot;')}">${o}</option>`).join('')}</select>`;
+    ml.appendChild(row);
+  });
+  document.getElementById('checkBtn').onclick=()=>checkMatch(ex);
+  document.getElementById('answerBtn').onclick=()=>showMatchAnswer(ex);
+  document.getElementById('nextBtn').onclick=next;
+}
+function checkMatch(ex){
+  if(answered) return;
+  const sels=[...document.querySelectorAll('#ml select')];
+  let ok=true;
+  sels.forEach(s=>{
+    const i=+s.dataset.i;
+    const right=s.value===ex.pairs[i][1];
+    s.classList.add(right?'correct':'wrong'); if(!right) ok=false;
+  });
+  finishFeedback(ok, ok?'All matched!':'Some are off — corrected key below.');
+  if(!ok) showMatchAnswer(ex);
+}
+function showMatchAnswer(ex){
+  const fb=document.getElementById('fb');fb.classList.add('show');
+  if(fb.querySelector('.answerkey')) return;
+  const div=document.createElement('div');div.className='answerkey';
+  div.innerHTML='<b>Correct matches:</b><ol>'+ex.pairs.map(p=>`<li>${p[0]} → ${p[1]}</li>`).join('')+'</ol>';
+  fb.appendChild(div);
+  if(!fb.classList.contains('good')&&!fb.classList.contains('poor')){fb.classList.add('poor');}
+}
+
+/* ----- shared ----- */
+function finishFeedback(ok,msg){
+  answered=true; done++; if(ok) correct++;
+  document.getElementById('sCorrect').textContent=correct;
+  document.getElementById('sDone').textContent=done;
+  const fb=document.getElementById('fb');
+  fb.className='feedback show '+(ok?'good':'poor');
+  fb.innerHTML=`<b>${ok?'✔ ':'✘ '}</b>${msg}`;
+}
+function next(){pos++; render();}
+document.getElementById('shuffleBtn').onclick=()=>{buildDeck();render();};
+
+buildDeck();render();
+</script>
+</body>
+</html>

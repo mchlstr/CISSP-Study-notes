@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CISSP Study Guide &amp; Practice</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#1a1e26; --panel2:#222834; --border:#2c3340;
+    --text:#e7ecf3; --muted:#9aa6b5; --accent:#4f9dff; --good:#34c77b; --warn:#f0b429;
+    --shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; color:var(--text);
+    background:radial-gradient(1200px 600px at 50% -10%, #182030 0%, var(--bg) 60%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:48px 20px 40px; width:100%;}
+  header h1{font-size:30px; margin:0 0 6px; letter-spacing:.3px;}
+  header h1 span{color:var(--accent);}
+  header p{color:var(--muted); margin:0 0 4px; font-size:15px; line-height:1.5;}
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--muted); margin:34px 0 14px; border-bottom:1px solid var(--border); padding-bottom:6px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;}
+  a.card{
+    display:block; text-decoration:none; color:var(--text);
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--border); border-radius:16px; padding:20px 22px;
+    box-shadow:var(--shadow); transition:border-color .15s, transform .06s;
+  }
+  a.card:hover{border-color:var(--accent);}
+  a.card:active{transform:translateY(1px);}
+  a.card .ico{font-size:26px; margin-bottom:10px;}
+  a.card h3{margin:0 0 6px; font-size:18px;}
+  a.card h3 .arrow{color:var(--accent); font-weight:400;}
+  a.card p{margin:0; color:var(--muted); font-size:13.5px; line-height:1.5;}
+  .pill{display:inline-block; font-size:11px; letter-spacing:.4px; text-transform:uppercase;
+    color:var(--accent); background:rgba(79,157,255,.10); border:1px solid var(--border);
+    padding:2px 8px; border-radius:20px; margin-bottom:12px;}
+  .note{background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--warn);
+    border-radius:10px; padding:12px 16px; color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:14px;}
+  .note b{color:var(--text);}
+  .domains{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px;}
+  .domains a{color:var(--text); text-decoration:none; font-size:14px;
+    padding:9px 12px; border:1px solid var(--border); border-radius:9px; background:var(--panel);
+    display:flex; justify-content:space-between; gap:10px;}
+  .domains a:hover{border-color:var(--accent);}
+  .domains a .w{color:var(--muted); font-variant-numeric:tabular-nums;}
+  footer{margin-top:auto; text-align:center; color:var(--muted); font-size:12px; padding:26px 20px;}
+  footer a{color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="pill">Open educational material</div>
+    <h1>CISSP <span>Study Guide &amp; Practice</span></h1>
+    <p>Eight-domain notes with inline diagrams, spaced-repetition flashcards, and interactive drag-and-drop drills — built while preparing for (and passing) the (ISC)&sup2; CISSP.</p>
+  </header>
+
+  <div class="section-title">Practice — interactive (runs in your browser)</div>
+  <div class="grid">
+    <a class="card" href="practice/anki/flashcards.html">
+      <div class="ico">🃏</div>
+      <h3>Flashcards <span class="arrow">→</span></h3>
+      <p>~1,900 cards across three decks — Concepts (apply it), Glossary (recall), Drill (technique). Filter by domain and deck; progress saves locally.</p>
+    </a>
+    <a class="card" href="practice/drills/order-match-drills.html">
+      <div class="ico">🔢</div>
+      <h3>Order &amp; Match drills <span class="arrow">→</span></h3>
+      <p>Drag-and-drop sequencing and matching — the CAT-style item types. Master the order to nail FIRST / NEXT / LAST questions.</p>
+    </a>
+    <a class="card" href="practice/drills/categorize-drills.html">
+      <div class="ico">🗂️</div>
+      <h3>Categorize drills <span class="arrow">→</span></h3>
+      <p>Sort items into the right buckets — control types, attack targets, methodologies, and more.</p>
+    </a>
+  </div>
+
+  <div class="section-title">Study notes — 8 domains</div>
+  <div class="domains">
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/01-security-and-risk-management"><span>Domain 1 · Security &amp; Risk Management</span><span class="w">16%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/02-asset-security"><span>Domain 2 · Asset Security</span><span class="w">10%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/03-security-architecture-and-engineering"><span>Domain 3 · Security Architecture &amp; Engineering</span><span class="w">13%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/04-communication-and-network-security"><span>Domain 4 · Communication &amp; Network Security</span><span class="w">13%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/05-identity-and-access-management"><span>Domain 5 · Identity &amp; Access Management</span><span class="w">13%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/06-security-assessment-and-testing"><span>Domain 6 · Security Assessment &amp; Testing</span><span class="w">12%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/07-security-operations"><span>Domain 7 · Security Operations</span><span class="w">13%</span></a>
+    <a href="https://github.com/mchlstr/CISSP-Study-notes/tree/main/domains/08-software-development-security"><span>Domain 8 · Software Development Security</span><span class="w">10%</span></a>
+  </div>
+
+  <div class="note">
+    <b>Where to read the notes:</b> the domain links above open on GitHub, where markdown and the
+    <b>Mermaid diagrams render</b> and folders are browsable. The practice apps above run live here.
+    Start from the <a href="https://github.com/mchlstr/CISSP-Study-notes" style="color:var(--accent)">repository README</a>, which maps out all eight domains.
+  </div>
+
+  <footer>
+    Original study material · no copyrighted question banks reproduced ·
+    <a href="https://github.com/mchlstr/CISSP-Study-notes">source on GitHub</a>
+  </footer>
+</div>
+</body>
+</html>

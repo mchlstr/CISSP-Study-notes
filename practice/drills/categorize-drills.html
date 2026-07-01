@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CISSP — Categorize (Drag into Buckets)</title>
+<style>
+  :root{--bg:#0f1620;--card:#16202c;--ink:#e7eef5;--muted:#9fb0c0;--line:#27384a;
+    --accent:#4ea1ff;--ok:#27c093;--bad:#ff6b6b;--chip:#22344a;--sel:#a78bfa;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{position:sticky;top:0;background:#0c121b;border-bottom:1px solid var(--line);
+    padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;z-index:5}
+  header h1{font-size:18px;margin:0;flex:1 1 auto}
+  .score{font-size:14px;color:var(--muted)}.score b{color:var(--ink)}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#1d2a38;
+    color:var(--ink);padding:7px 13px;border-radius:8px}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#06223f;font-weight:600}
+  button.ghost{background:transparent}
+  main{max-width:900px;margin:0 auto;padding:22px 16px 80px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--sel);border:1px solid var(--line);border-radius:20px;padding:2px 10px;margin-bottom:8px}
+  h2.title{font-size:20px;margin:.2em 0}
+  .prompt{color:var(--muted);margin:4px 0 14px}
+  .pool{display:flex;flex-wrap:wrap;gap:8px;min-height:54px;background:#101a25;
+    border:1px dashed var(--line);border-radius:10px;padding:10px;margin-bottom:16px}
+  .pool.over,.dropzone.over{border-color:var(--accent);background:#16273a}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:8px;
+    padding:7px 11px;cursor:grab;user-select:none;font-size:14.5px}
+  .chip.selected{border-color:var(--sel);box-shadow:0 0 0 2px rgba(167,139,250,.4)}
+  .chip.correct{border-color:var(--ok);background:#142b26}
+  .chip.wrong{border-color:var(--bad);background:#2c1820}
+  .bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .bin{background:#13202c;border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column}
+  .bin h3{margin:0;font-size:14px;padding:9px 11px;border-bottom:1px solid var(--line);color:var(--accent)}
+  .dropzone{flex:1 1 auto;min-height:70px;padding:9px;display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .feedback{margin-top:14px;padding:11px 14px;border-radius:10px;display:none}
+  .feedback.show{display:block}
+  .feedback.good{background:#13302a;border:1px solid var(--ok)}
+  .feedback.poor{background:#2c1820;border:1px solid var(--bad)}
+  .answerkey{margin-top:10px;font-size:14px;color:var(--muted)}
+  .answerkey li{margin:2px 0}
+  .hint{color:var(--muted);font-size:13px;margin-top:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CISSP — Categorize (drag into buckets)</h1>
+  <div class="score">Set <b id="sPos">1</b> / <b id="sTotal">0</b> &nbsp;·&nbsp; Correct: <b id="sCorrect">0</b> / <b id="sDone">0</b></div>
+  <button class="ghost" id="shuffleBtn">↻ Reshuffle</button>
+</header>
+<main><div class="card" id="card"></div></main>
+
+<script>
+/* item = {x: label, c: correct category}. cats = bin names. */
+const SETS = [
+  {t:"Development methodology — by nature", cats:["Sequential","Iterative / incremental","Risk-driven"], items:[
+    {x:"Waterfall",c:"Sequential"},{x:"V-model",c:"Sequential"},
+    {x:"Agile / Scrum",c:"Iterative / incremental"},{x:"RAD",c:"Iterative / incremental"},
+    {x:"Spiral",c:"Risk-driven"}]},
+  {t:"Software attack — by target", cats:["Client-side","Server-side","Memory"], items:[
+    {x:"Cross-site scripting (XSS)",c:"Client-side"},{x:"Cross-site request forgery (CSRF)",c:"Client-side"},
+    {x:"SQL injection",c:"Server-side"},{x:"Command injection",c:"Server-side"},
+    {x:"Buffer overflow",c:"Memory"},{x:"TOCTOU race condition",c:"Memory"}]},
+  {t:"Detection & response tooling — by role", cats:["Endpoint","Aggregation & correlation","Automation","Behavior analytics"], items:[
+    {x:"EDR",c:"Endpoint"},{x:"SIEM",c:"Aggregation & correlation"},
+    {x:"SOAR",c:"Automation"},{x:"UEBA",c:"Behavior analytics"}]},
+  {t:"Control types — by function", cats:["Preventive","Detective","Corrective","Deterrent"], items:[
+    {x:"Firewall",c:"Preventive"},{x:"Encryption",c:"Preventive"},{x:"Least privilege",c:"Preventive"},
+    {x:"IDS alert",c:"Detective"},{x:"Audit log review",c:"Detective"},{x:"Motion sensor",c:"Detective"},
+    {x:"Restore from backup",c:"Corrective"},{x:"Apply a patch",c:"Corrective"},
+    {x:'"Beware of Dog" sign',c:"Deterrent"},{x:"Visible warning banner",c:"Deterrent"}]},
+  {t:"Control categories — by nature", cats:["Technical / Logical","Administrative","Physical"], items:[
+    {x:"Firewall",c:"Technical / Logical"},{x:"Encryption",c:"Technical / Logical"},{x:"Antivirus",c:"Technical / Logical"},
+    {x:"Security policy",c:"Administrative"},{x:"Awareness training",c:"Administrative"},{x:"Background check",c:"Administrative"},
+    {x:"Door lock",c:"Physical"},{x:"Security guard",c:"Physical"},{x:"Bollards",c:"Physical"}]},
+  {t:"CIA triad — what the control protects", cats:["Confidentiality","Integrity","Availability"], items:[
+    {x:"Encryption",c:"Confidentiality"},{x:"Access control",c:"Confidentiality"},
+    {x:"Hashing",c:"Integrity"},{x:"Digital signature",c:"Integrity"},
+    {x:"RAID",c:"Availability"},{x:"Backups",c:"Availability"},{x:"Load balancing",c:"Availability"}]},
+  {t:"Cryptography — algorithm type", cats:["Symmetric","Asymmetric","Hashing"], items:[
+    {x:"AES",c:"Symmetric"},{x:"3DES",c:"Symmetric"},{x:"Blowfish",c:"Symmetric"},
+    {x:"RSA",c:"Asymmetric"},{x:"ECC",c:"Asymmetric"},{x:"Diffie-Hellman",c:"Asymmetric"},
+    {x:"SHA-256",c:"Hashing"},{x:"MD5",c:"Hashing"}]},
+  {t:"Access control models — how access is decided", cats:["DAC","MAC","RBAC","ABAC"], items:[
+    {x:"Owner sets permissions on their file",c:"DAC"},
+    {x:"Access by clearance + classification labels",c:"MAC"},
+    {x:"Access granted by job role",c:"RBAC"},
+    {x:"Access by department + device + time of day",c:"ABAC"}]},
+  {t:"Backup types", cats:["Full","Incremental","Differential"], items:[
+    {x:"Copies ALL data",c:"Full"},{x:"Slowest to create, fastest to restore",c:"Full"},
+    {x:"Backs up changes since the last backup of ANY type",c:"Incremental"},{x:"Restore needs the full + EVERY increment in order",c:"Incremental"},
+    {x:"Backs up changes since the last FULL backup",c:"Differential"},{x:"Does NOT clear the archive bit",c:"Differential"},{x:"Restore needs only the full + the LATEST one",c:"Differential"}]},
+  {t:"Evidence types", cats:["Real","Documentary","Testimonial","Demonstrative"], items:[
+    {x:"The seized hard drive itself",c:"Real"},
+    {x:"Server log files / a signed contract",c:"Documentary"},
+    {x:"A witness's spoken account",c:"Testimonial"},
+    {x:"A diagram drawn to explain the attack",c:"Demonstrative"}]},
+  {t:"Risk responses", cats:["Avoid","Transfer","Mitigate","Accept"], items:[
+    {x:"Discontinue the risky activity",c:"Avoid"},
+    {x:"Buy cyber-insurance",c:"Transfer"},
+    {x:"Deploy a control to reduce the risk",c:"Mitigate"},
+    {x:"Acknowledge it and take no action",c:"Accept"}]},
+  {t:"NIST CSF — core functions", cats:["Identify","Protect","Detect","Respond","Recover"], items:[
+    {x:"Asset inventory",c:"Identify"},{x:"Risk assessment",c:"Identify"},
+    {x:"Access control + training",c:"Protect"},
+    {x:"Continuous monitoring",c:"Detect"},{x:"Anomaly detection",c:"Detect"},
+    {x:"Execute the incident response plan",c:"Respond"},
+    {x:"Restore operations from backup",c:"Recover"}]},
+  {t:"OSI layer — where it lives", cats:["Data Link (L2)","Network (L3)","Transport (L4)","Application (L7)"], items:[
+    {x:"Switch",c:"Data Link (L2)"},{x:"MAC address",c:"Data Link (L2)"},{x:"ARP",c:"Data Link (L2)"},
+    {x:"Router",c:"Network (L3)"},{x:"IP address",c:"Network (L3)"},
+    {x:"TCP",c:"Transport (L4)"},{x:"UDP",c:"Transport (L4)"},
+    {x:"HTTP",c:"Application (L7)"},{x:"DNS",c:"Application (L7)"}]},
+  {t:"STRIDE — property violated", cats:["Authentication","Integrity","Non-repudiation","Confidentiality","Availability","Authorization"], items:[
+    {x:"Spoofing",c:"Authentication"},{x:"Tampering",c:"Integrity"},{x:"Repudiation",c:"Non-repudiation"},
+    {x:"Information Disclosure",c:"Confidentiality"},{x:"Denial of Service",c:"Availability"},{x:"Elevation of Privilege",c:"Authorization"}]},
+  {t:"Governance documents — by type", cats:["Policy","Standard","Procedure","Guideline"], items:[
+    {x:"High-level mandatory management intent (states WHY)",c:"Policy"},
+    {x:"Mandatory specific requirement (e.g., AES-256 at rest)",c:"Standard"},
+    {x:"Step-by-step instructions to do a task (the HOW)",c:"Procedure"},
+    {x:"Recommended, non-mandatory best practice",c:"Guideline"}]},
+  {t:"Plans — by time horizon", cats:["Strategic","Tactical","Operational"], items:[
+    {x:"Long-term (~5 yr) org-wide goals",c:"Strategic"},
+    {x:"Mid-term (~1 yr) project / milestone plan",c:"Tactical"},
+    {x:"Short-term, detailed, day-to-day (updated often)",c:"Operational"}]},
+  {t:"Laws & regulations — by domain", cats:["Healthcare","Payment cards","Financial reporting","Financial privacy","EU privacy","Education"], items:[
+    {x:"HIPAA",c:"Healthcare"},{x:"PCI-DSS",c:"Payment cards"},{x:"SOX",c:"Financial reporting"},
+    {x:"GLBA",c:"Financial privacy"},{x:"GDPR",c:"EU privacy"},{x:"FERPA",c:"Education"}]},
+  {t:"Malware — by type", cats:["Virus","Worm","Trojan","Ransomware","Rootkit","Logic bomb"], items:[
+    {x:"Needs a host file + user action to spread",c:"Virus"},
+    {x:"Self-replicates across networks, no user action",c:"Worm"},
+    {x:"Disguised as legitimate software",c:"Trojan"},
+    {x:"Encrypts data and demands payment",c:"Ransomware"},
+    {x:"Hides itself with kernel/admin-level access",c:"Rootkit"},
+    {x:"Triggers on a condition or date",c:"Logic bomb"}]},
+  {t:"Data roles", cats:["Owner","Custodian","Controller","Processor","User"], items:[
+    {x:"Ultimately accountable; classifies the data",c:"Owner"},
+    {x:"Implements protection per classification (IT)",c:"Custodian"},
+    {x:"Decides WHY/HOW personal data is processed (GDPR)",c:"Controller"},
+    {x:"Processes personal data on the controller's behalf (GDPR)",c:"Processor"},
+    {x:"Accesses data to do their job",c:"User"}]},
+  {t:"BC/DR metrics", cats:["RTO","RPO","MTD","WRT"], items:[
+    {x:"Target time to RESTORE a system after disruption",c:"RTO"},
+    {x:"Max acceptable DATA LOSS (how far back)",c:"RPO"},
+    {x:"Max total downtime before unacceptable damage",c:"MTD"},
+    {x:"Time to test/verify after recovery, before go-live",c:"WRT"}]},
+  {t:"Authentication factors", cats:["Know","Have","Are","Do","Where"], items:[
+    {x:"Password",c:"Know"},{x:"PIN",c:"Know"},
+    {x:"Hardware token",c:"Have"},{x:"Smart card",c:"Have"},
+    {x:"Fingerprint",c:"Are"},{x:"Iris scan",c:"Are"},
+    {x:"Signature dynamics",c:"Do"},{x:"Keystroke pattern",c:"Do"},
+    {x:"GPS / geolocation",c:"Where"}]},
+  {t:"Social engineering — by channel", cats:["Email","Phone","SMS","In-person","Web / DNS"], items:[
+    {x:"Phishing",c:"Email"},{x:"Whaling (executives)",c:"Email"},{x:"Spear phishing",c:"Email"},
+    {x:"Vishing",c:"Phone"},{x:"Smishing",c:"SMS"},
+    {x:"Tailgating",c:"In-person"},{x:"Shoulder surfing",c:"In-person"},
+    {x:"Pharming (DNS redirect)",c:"Web / DNS"}]},
+  {t:"IDS / IPS — detection method", cats:["Signature-based","Anomaly-based"], items:[
+    {x:"Matches known attack patterns",c:"Signature-based"},{x:"Low false positives",c:"Signature-based"},{x:"Misses zero-days",c:"Signature-based"},
+    {x:"Builds a baseline of normal",c:"Anomaly-based"},{x:"Can detect novel attacks",c:"Anomaly-based"},{x:"Higher false positives",c:"Anomaly-based"}]},
+  {t:"Threat actors", cats:["Script kiddie","Hacktivist","Insider","Organized crime","Nation-state / APT"], items:[
+    {x:"Low skill, uses others' tools",c:"Script kiddie"},
+    {x:"Politically / ideologically motivated",c:"Hacktivist"},
+    {x:"Authorized user abusing access",c:"Insider"},
+    {x:"Financially motivated, sophisticated",c:"Organized crime"},
+    {x:"Well-resourced, persistent, espionage",c:"Nation-state / APT"}]},
+  {t:"Cipher — block vs stream", cats:["Block cipher","Stream cipher"], items:[
+    {x:"DES / 3DES",c:"Block cipher"},{x:"AES",c:"Block cipher"},
+    {x:"Blowfish / Twofish",c:"Block cipher"},{x:"IDEA",c:"Block cipher"},
+    {x:"RC4",c:"Stream cipher"},{x:"ChaCha20",c:"Stream cipher"}]},
+];
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let deck=[],pos=0,correct=0,done=0,answered=false,sel=null;
+
+function buildDeck(){
+  deck=shuffle(SETS);pos=0;correct=0;done=0;
+  document.getElementById('sCorrect').textContent=0;
+  document.getElementById('sDone').textContent=0;
+  document.getElementById('sTotal').textContent=deck.length;
+}
+function updateProgress(){
+  document.getElementById('sPos').textContent=Math.min(pos+1,deck.length);
+  document.getElementById('sTotal').textContent=deck.length;
+}
+function renderDone(){
+  document.getElementById('sPos').textContent=deck.length;
+  document.getElementById('card').innerHTML=`<span class="tag">Done</span>
+    <h2 class="title">✓ All ${deck.length} sets complete</h2>
+    <p class="prompt">You scored <b>${correct}</b> / ${deck.length} correct. Reshuffle for a fresh run in a new random order.</p>
+    <div class="controls"><button class="primary" id="restartBtn">↻ Restart (reshuffle)</button></div>`;
+  document.getElementById('restartBtn').onclick=()=>{buildDeck();render();};
+}
+function render(){
+  answered=false;sel=null;
+  if(pos>=deck.length){renderDone();return;}
+  updateProgress();
+  const ex=deck[pos];
+  const card=document.getElementById('card');
+  card.innerHTML=`
+    <span class="tag">Categorize — drag into buckets</span>
+    <h2 class="title">${ex.t}</h2>
+    <p class="prompt">Drag each item into the correct bucket (or tap an item, then tap a bucket). Then Check.</p>
+    <div class="pool dropzone" id="pool"></div>
+    <div class="bins" id="bins"></div>
+    <div class="controls">
+      <button class="primary" id="checkBtn">Check</button>
+      <button class="ghost" id="answerBtn">Show answer</button>
+      <button id="nextBtn">Next →</button>
+    </div>
+    <div class="feedback" id="fb"></div>
+    <p class="hint">Items left in the top pool count as unanswered.</p>`;
+  // chips into pool (shuffled)
+  const pool=document.getElementById('pool');
+  shuffle(ex.items).forEach((it,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';chip.draggable=true;chip.dataset.correct=it.c;chip.dataset.id='c'+i;
+    chip.textContent=it.x;pool.appendChild(chip);
+  });
+  // bins
+  const bins=document.getElementById('bins');
+  ex.cats.forEach(cat=>{
+    const bin=document.createElement('div');bin.className='bin';
+    bin.innerHTML=`<h3>${cat}</h3><div class="dropzone" data-cat="${cat.replace(/"/g,'&quot;')}"></div>`;
+    bins.appendChild(bin);
+  });
+  wire();
+  document.getElementById('checkBtn').onclick=()=>check(ex);
+  document.getElementById('answerBtn').onclick=()=>showAnswer(ex);
+  document.getElementById('nextBtn').onclick=next;
+}
+function wire(){
+  let dragged=null;
+  document.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('dragstart',e=>{dragged=chip;setTimeout(()=>chip.style.opacity='.4',0);});
+    chip.addEventListener('dragend',()=>{if(dragged)dragged.style.opacity='';dragged=null;});
+    chip.addEventListener('click',()=>{ // tap-to-select fallback
+      if(sel===chip){chip.classList.remove('selected');sel=null;}
+      else{if(sel)sel.classList.remove('selected');sel=chip;chip.classList.add('selected');}
+    });
+  });
+  document.querySelectorAll('.dropzone').forEach(zone=>{
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('over');});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
+    zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('over');
+      if(dragged){dragged.classList.remove('correct','wrong');zone.appendChild(dragged);}});
+    zone.addEventListener('click',()=>{ // tap a zone to drop the selected chip
+      if(sel){sel.classList.remove('selected','correct','wrong');zone.appendChild(sel);sel=null;}
+    });
+  });
+}
+function check(ex){
+  if(answered)return;
+  const chips=[...document.querySelectorAll('.chip')];
+  let ok=true;
+  chips.forEach(chip=>{
+    const zone=chip.closest('.dropzone');
+    const inBin=zone&&zone.dataset.cat;
+    const right=inBin && zone.dataset.cat===chip.dataset.correct;
+    chip.classList.remove('selected');
+    chip.classList.add(right?'correct':'wrong');
+    if(!right) ok=false;
+  });
+  answered=true;done++;if(ok)correct++;
+  document.getElementById('sCorrect').textContent=correct;
+  document.getElementById('sDone').textContent=done;
+  const fb=document.getElementById('fb');
+  fb.className='feedback show '+(ok?'good':'poor');
+  fb.innerHTML=`<b>${ok?'✔ ':'✘ '}</b>${ok?'All placed correctly!':'Some are off — corrected key below.'}`;
+  if(!ok)showAnswer(ex);
+}
+function showAnswer(ex){
+  const fb=document.getElementById('fb');fb.classList.add('show');
+  if(!fb.classList.contains('good')&&!fb.classList.contains('poor'))fb.classList.add('poor');
+  if(fb.querySelector('.answerkey'))return;
+  const by={};ex.items.forEach(it=>{(by[it.c]=by[it.c]||[]).push(it.x);});
+  const div=document.createElement('div');div.className='answerkey';
+  div.innerHTML='<b>Correct buckets:</b><ul>'+ex.cats.map(c=>`<li><b>${c}:</b> ${(by[c]||[]).join(', ')}</li>`).join('')+'</ul>';
+  fb.appendChild(div);
+}
+function next(){pos++;render();}
+document.getElementById('shuffleBtn').onclick=()=>{buildDeck();render();};
+buildDeck();render();
+</script>
+</body>
+</html>
