@@ -2,7 +2,7 @@
 
 ## Overview
 
-Maymí/Harris CISSP terminology for severity classification of disruptive events. Tested as precise definitional distinction — easily confused between Disaster and Catastrophe.
+Disruptive events are classified by **severity** — how badly they hit the facility and how much recovery they demand. The three levels run **Nondisaster → Disaster → Catastrophe**, and the exam leans on the precise line between the last two: a disaster *disrupts* the facility, a catastrophe *destroys* it.
 
 ## The Three Levels
 
