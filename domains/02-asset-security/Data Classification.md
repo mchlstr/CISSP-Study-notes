@@ -31,7 +31,7 @@ Categorizing data based on its sensitivity, value, and criticality to determine 
 
 **Commercial order highest → lowest:** **Confidential/PROPRIETARY (highest) > Private > Sensitive > Public (lowest)**. **Proprietary = the commercial equivalent of Confidential** — trade secrets / "secret sauce" / source code; the most damaging to disclose.
 
-> **Exam Q:** Fred classifies data using *Private, Sensitive, Public, Proprietary* — which is the HIGHEST? → **PROPRIETARY** (it's the commercial equivalent of Confidential / trade secrets).
+> **Example Q:** Fred classifies data using *Private, Sensitive, Public, Proprietary* — which is the HIGHEST? → **PROPRIETARY** (it's the commercial equivalent of Confidential / trade secrets).
 
 **TRAP — "Confidential" ranks DIFFERENTLY in the two schemes:**
 - **Commercial:** Confidential is the **HIGHEST** level (= Proprietary).
