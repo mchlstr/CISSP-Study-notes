@@ -158,7 +158,7 @@ When 2+ answers look correct, the wrong ones are usually **TRUE**. Don't pick th
        6. ⌨️ technical / tactical / "do it now"  ← YOUR instinct grabs here — RESIST
 ```
 > 🔑 The exam pays the **manager** (top of the ladder), not the **technician** (bottom).
-> Your pentester brain dives for rung 6. Force yourself UP the ladder first.
+> Your technician brain dives for rung 6. Force yourself UP the ladder first.
 
 ### 🧭 What "think like a manager" REALLY means (re-label it in your head)
 
