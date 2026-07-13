@@ -430,7 +430,7 @@ The **media librarian** is responsible for the security and protection of media 
 
 ---
 
-## Session Backfill — High-Yield Facts (18-20 Jun 2026)
+## High-Yield Facts
 
 ### Privacy & Compliance Laws (D1/D2)
 - "financial institution + privacy notice" → **GLBA**
