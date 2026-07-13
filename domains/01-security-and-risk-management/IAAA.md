@@ -71,7 +71,7 @@ The subject and system move through Identification → Authentication → Author
 sequenceDiagram
     participant U as Subject
     participant S as System
-    U->>S: 1. Identification ("I am Thor")
+    U->>S: 1. Identification ("I am John")
     S->>U: Challenge for proof
     U->>S: 2. Authentication (factors: know / have / are)
     S->>S: Verify factors
