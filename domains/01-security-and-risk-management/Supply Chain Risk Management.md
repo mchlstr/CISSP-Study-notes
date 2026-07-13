@@ -21,7 +21,7 @@ Managing security risks introduced through third-party vendors, suppliers, and s
 - **Third-party risk assessments** - ongoing monitoring
 - **Minimum security requirements** - baseline requirements for all vendors
 
-> [!tip] Best security standard to require of a vendor handling your data
+> NOTE: Best security standard to require of a vendor handling your data
 > Require the vendor to **handle your data the same way YOUR organization would** (apply your own security standard to it). This beats weaker exam distractors like "comply with all applicable laws" (a floor, not your standard) and "eliminate all risk" (impossible — an absolutes trap).
 
 ### Vendor Agreement Types (keep straight)
