@@ -53,7 +53,7 @@ Each commercial tier maps to a **disclosure-damage level** (highest → lowest):
 
 **Key tell — "Private" is the personal-data tier.** When data is **PII about individuals** (phone, address, personal info), the commercial level is **Private**. Pair that with the damage phrasing: "damage but not exceptional" sits **just below Confidential** (which = exceptional/grave damage) → **Private**.
 
-> **Exam Q:** Amanda works at a healthcare company subject to **HIPAA**. She classifies patient data that is **NOT medical data** but **contains PII** (phone number, address). The company believes exposure would cause **damage but NOT exceptional damage**. Which classification level — public / sensitive / private / confidential? → **PRIVATE.**
+> **Example Q:** Amanda works at a healthcare company subject to **HIPAA**. She classifies patient data that is **NOT medical data** but **contains PII** (phone number, address). The company believes exposure would cause **damage but NOT exceptional damage**. Which classification level — public / sensitive / private / confidential? → **PRIVATE.**
 
 **Two tells point to Private:**
 1. It's **PII about individuals** → "Private" is the commercial tier specifically for **personal information about individuals**.
@@ -157,7 +157,7 @@ The two common schemes (levels high → low):
 
 This is the operational payoff of classification: it tells you **which controls to apply to a given system/software**.
 
-> **Exam Q:** How do you determine which controls from the baselines should be applied to a given system or software package? → **Select them based on the DATA CLASSIFICATION of the data it stores or handles.**
+> **Example Q:** How do you determine which controls from the baselines should be applied to a given system or software package? → **Select them based on the DATA CLASSIFICATION of the data it stores or handles.**
 
 **Principle:** the data's **classification LEVEL drives control selection** — higher classification → stronger controls. Classification exists *precisely* to assign the appropriate **level** of controls to data; a system inherits the control level required by the most sensitive data it touches.
 
@@ -174,7 +174,7 @@ This is the operational payoff of classification: it tells you **which controls 
 
 When a single system holds data at **MULTIPLE classification levels**, the system as a whole is classified at the **HIGHEST level of any data it contains**. This is the **"high water mark" principle**: the system "rises to" its most sensitive data.
 
-> **Exam Q:** A government/military system contains a **MIX** of **Secret, Confidential, and Top Secret** data — how is the SYSTEM classified? → **TOP SECRET** (the highest level of any data it contains).
+> **Example Q:** A government/military system contains a **MIX** of **Secret, Confidential, and Top Secret** data — how is the SYSTEM classified? → **TOP SECRET** (the highest level of any data it contains).
 
 **Principle:** everyone who accesses the system and every control protecting it must meet the requirements of the **MOST SENSITIVE data present**. You **can't protect Top Secret data with only Secret-level controls** — so the whole system inherits Top Secret requirements.
 
