@@ -245,13 +245,13 @@ They're glued together in practice, but they live on **different layers**:
 ## 📡 OSI 7 Layers — "Please Do Not Throw Sausage Pizza Away"
 
 ```
-7 Application  📱  the app you see (HTTP, DNS, SSH)        Please
-6 Presentation 🎁  encrypt / format / compress (TLS, JPEG)  Do
-5 Session      🤝  start & stop the conversation            Not
+1 Physical     🔌  bits & cables                            Please
+2 Data Link    🔗  MAC, SWITCHES, frames                    Do
+3 Network      🗺️  IP, ROUTERS, packets                     Not
 4 Transport    📦  TCP/UDP, PORTS, segments                 Throw
-3 Network      🗺️  IP, ROUTERS, packets                     Sausage
-2 Data Link    🔗  MAC, SWITCHES, frames                    Pizza
-1 Physical     🔌  bits & cables                            Away
+5 Session      🤝  start & stop the conversation            Sausage
+6 Presentation 🎁  encrypt / format / compress (TLS, JPEG)  Pizza
+7 Application  📱  the app you see (HTTP, DNS, SSH)         Away
 ```
 > 🔑 Firewalls deepen as you go up: packet filter (L3) < circuit proxy (L5) < app proxy (L7).
 > Switch = L2 (MAC) · Router = L3 (IP) · Gateway = L7.
