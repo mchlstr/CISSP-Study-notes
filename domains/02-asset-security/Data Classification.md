@@ -31,7 +31,7 @@ Categorizing data based on its sensitivity, value, and criticality to determine 
 
 **Commercial order highest → lowest:** **Confidential/PROPRIETARY (highest) > Private > Sensitive > Public (lowest)**. **Proprietary = the commercial equivalent of Confidential** — trade secrets / "secret sauce" / source code; the most damaging to disclose.
 
-> **Example Q:** Fred classifies data using *Private, Sensitive, Public, Proprietary* — which is the HIGHEST? → **PROPRIETARY** (it's the commercial equivalent of Confidential / trade secrets).
+> **Example Q:** Johnny classifies data using *Private, Sensitive, Public, Proprietary* — which is the HIGHEST? → **PROPRIETARY** (it's the commercial equivalent of Confidential / trade secrets).
 
 **TRAP — "Confidential" ranks DIFFERENTLY in the two schemes:**
 - **Commercial:** Confidential is the **HIGHEST** level (= Proprietary).
@@ -53,7 +53,7 @@ Each commercial tier maps to a **disclosure-damage level** (highest → lowest):
 
 **Key tell — "Private" is the personal-data tier.** When data is **PII about individuals** (phone, address, personal info), the commercial level is **Private**. Pair that with the damage phrasing: "damage but not exceptional" sits **just below Confidential** (which = exceptional/grave damage) → **Private**.
 
-> **Example Q:** Amanda works at a healthcare company subject to **HIPAA**. She classifies patient data that is **NOT medical data** but **contains PII** (phone number, address). The company believes exposure would cause **damage but NOT exceptional damage**. Which classification level — public / sensitive / private / confidential? → **PRIVATE.**
+> **Example Q:** Lilliana works at a healthcare company subject to **HIPAA**. She classifies patient data that is **NOT medical data** but **contains PII** (phone number, address). The company believes exposure would cause **damage but NOT exceptional damage**. Which classification level — public / sensitive / private / confidential? → **PRIVATE.**
 
 **Two tells point to Private:**
 1. It's **PII about individuals** → "Private" is the commercial tier specifically for **personal information about individuals**.
