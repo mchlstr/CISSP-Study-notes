@@ -20,7 +20,7 @@ Industry-standard frameworks that organizations adopt (or are required to adopt)
 - **Cross-maps to compliance frameworks** (PCI DSS, HIPAA, NIST) — so applying the benchmark helps you *meet* the compliance obligation
 - **PCI DSS = obligation; CIS Benchmark = the tool you use on the system to meet it.**
 
-**EXAM Q — "Best security standard to harden a Windows 11 system that processes credit cards?"** → the **CIS Windows 11 Benchmark**. The **credit-card detail is a DISTRACTOR** pulling you toward **PCI DSS** — but PCI DSS is the *compliance requirement*, not a host hardening baseline, and gives no Windows 11-specific settings. CIS is the OS hardening baseline (the HOW) that actually hardens the box.
+**EXAMPLE Q — "Best security standard to harden a Windows 11 system that processes credit cards?"** → the **CIS Windows 11 Benchmark**. The **credit-card detail is a DISTRACTOR** pulling you toward **PCI DSS** — but PCI DSS is the *compliance requirement*, not a host hardening baseline, and gives no Windows 11-specific settings. CIS is the OS hardening baseline (the HOW) that actually hardens the box.
 
 **Why CIS over the other baselines:**
 - **vs Microsoft Windows 11 security baseline** — Microsoft's is good but it's the **vendor's own**; CIS is **independent, more widely recognized for compliance, and has tiered L1/L2 profiles** → CIS wins, Microsoft is a **solid runner-up**
